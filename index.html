@@ -79,13 +79,13 @@
             position: 'right',
             labels: {
               generateLabels: function(chart) {
-                // 修改图例显示，添加百分比信息
                 const originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
                 return originalLabels.map((label, index) => {
                   const value = chart.data.datasets[0].data[index];
                   const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                   const percentage = ((value / total) * 100).toFixed(2);
-                  label.text += ` (${percentage}%)`; // 添加百分比到图例
+                  // 这里是关键：确保 label.text 正确设置为氨基酸名称
+                  label.text = `${chart.data.labels[index]} (${percentage}%)`;
                   return label;
                 });
               }
