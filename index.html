@@ -57,6 +57,22 @@
           title: {
             display: true,
             text: '突变氨基酸数目分布'
+          },
+          tooltip: {
+            callbacks: {
+              // 显示每个部分的百分比
+              label: function(tooltipItem) {
+                let label = tooltipItem.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                const value = tooltipItem.raw;
+                const total = tooltipItem.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(2);
+                label += value + ' (' + percentage + '%)';
+                return label;
+              }
+            }
           }
         }
       }
