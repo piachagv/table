@@ -1,122 +1,155 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>突变氨基酸分布图</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>突变氨基酸数目分布</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-    }
-    canvas {
+    /* 设置饼图大小 */
+    #mutationPieChart {
       max-width: 500px;
-      margin: 20px auto;
-    }
-    form {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    input[type="number"] {
-      width: 60px;
-    }
-    label {
-      font-size: 14px;
-    }
-    #chartContainer {
-      display: flex;
-      justify-content: center;
+      margin: auto;
     }
   </style>
 </head>
 <body>
-  <h2>突变氨基酸数量输入</h2>
-  <form id="dataForm">
-    <!-- 生成 20 个氨基酸输入 -->
+  <h1>突变氨基酸数目分布</h1>
+  
+  <!-- 表单：动态添加氨基酸名称和数目 -->
+  <h3>请输入氨基酸名称及其突变数目：</h3>
+  <form id="mutationForm">
+    <div id="aminoAcidInputs">
+      <div class="input-group">
+        <input type="text" name="aminoAcid[]" placeholder="氨基酸名称 (如：Ala)" required>
+        <input type="number" name="count[]" placeholder="数目" required>
+        <button type="button" onclick="addInput()">添加</button>
+      </div>
+    </div>
+    <br><br>
+    <button type="submit">更新饼图</button>
   </form>
-  <button onclick="updateChart()">生成图表</button>
-  <div id="chartContainer">
-    <canvas id="aminoPieChart"></canvas>
-  </div>
+  
+  <!-- 饼图 -->
+  <canvas id="mutationPieChart"></canvas>
 
   <script>
-    const aminoAcids = [
-      'Ala', 'Arg', 'Asn', 'Asp', 'Cys',
-      'Gln', 'Glu', 'Gly', 'His', 'Ile',
-      'Leu', 'Lys', 'Met', 'Phe', 'Pro',
-      'Ser', 'Thr', 'Trp', 'Tyr', 'Val'
-    ];
+    const ctx = document.getElementById('mutationPieChart').getContext('2d');
 
-    const simpsonsColors = [
-      '#FED766', '#FE4A49', '#2AB7CA', '#E6E6EA', '#F6ABB6',
-      '#007849', '#FFA400', '#E63946', '#6A0572', '#3A86FF',
-      '#8338EC', '#FF006E', '#FB5607', '#FFBE0B', '#06D6A0',
-      '#118AB2', '#EF476F', '#073B4C', '#FF9F1C', '#A8DADC'
-    ];
+    // 辛普森风格的氨基酸颜色（20种）
+    const aminoAcidColors = {
+      "Ala": "#F6B700", // 亮黄色
+      "Cys": "#D63031", // 红色
+      "Asp": "#00B5E2", // 蓝色
+      "Glu": "#FF6B6B", // 粉红色
+      "Phe": "#6B1E1E", // 暗红色
+      "Gly": "#A29BFE", // 淡紫色
+      "His": "#F79C42", // 橙色
+      "Ile": "#0984E3", // 深蓝色
+      "Lys": "#DFF6F0", // 浅青色
+      "Leu": "#2D3436", // 深灰色
+      "Met": "#00B894", // 绿色
+      "Asn": "#81ECEC", // 浅蓝色
+      "Pro": "#FD79A8", // 亮粉色
+      "Gln": "#E17055", // 橙红色
+      "Arg": "#74B9FF", // 浅蓝色
+      "Ser": "#FFE156", // 明黄色
+      "Thr": "#FDCB82", // 浅橙色
+      "Trp": "#6C5CE7", // 紫色
+      "Tyr": "#A29BFE", // 淡紫色
+      "Val": "#55E6F3"  // 天蓝色
+    };
 
-    const form = document.getElementById('dataForm');
-    aminoAcids.forEach((aa, i) => {
-      const label = document.createElement('label');
-      label.innerHTML = `${aa}: <input type="number" name="${aa}" value="0" min="0">`;
-      form.appendChild(label);
-    });
+    // 初始化饼图数据
+    const data = {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: [],
+      }]
+    };
 
-    const ctx = document.getElementById('aminoPieChart').getContext('2d');
-    let chart;
-
-    function updateChart() {
-      const formData = new FormData(form);
-      const values = aminoAcids.map(aa => parseInt(formData.get(aa)) || 0);
-
-      if (chart) chart.destroy();
-
-      const data = {
-        labels: aminoAcids,
-        datasets: [{
-          data: values,
-          backgroundColor: simpsonsColors
-        }]
-      };
-
-      chart = new Chart(ctx, {
-        type: 'pie',
-        data: data,
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'right',
-              labels: {
-                generateLabels: function(chart) {
-                  const original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
-                  return original.map((label, i) => {
-                    label.text = chart.data.labels[i];
-                    return label;
-                  });
+    const config = {
+      type: 'pie',
+      data: data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          title: {
+            display: true,
+            text: '突变氨基酸数目分布'
+          },
+          tooltip: {
+            callbacks: {
+              // 显示每个部分的百分比
+              label: function(tooltipItem) {
+                let label = tooltipItem.label || '';
+                if (label) {
+                  label += ': ';
                 }
+                const value = tooltipItem.raw;
+                const total = tooltipItem.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(2);
+                label += value + ' (' + percentage + '%)';
+                return label;
               }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(tooltipItem) {
-                  const label = tooltipItem.label || '';
-                  const value = tooltipItem.raw;
-                  const total = tooltipItem.dataset.data.reduce((a, b) => a + b, 0);
-                  const percent = total ? ((value / total) * 100).toFixed(2) : 0;
-                  return `${label}: ${value} (${percent}%)`;
-                }
-              }
-            },
-            title: {
-              display: true,
-              text: '突变氨基酸数目分布'
             }
           }
         }
-      });
+      }
+    };
+
+    const myChart = new Chart(ctx, config);
+
+    // 表单提交更新饼图
+    document.getElementById('mutationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // 获取所有输入的氨基酸名称和数量
+      const aminoAcids = document.getElementsByName('aminoAcid[]');
+      const counts = document.getElementsByName('count[]');
+
+      // 获取氨基酸名称和数量的数组
+      const labels = [];
+      const dataValues = [];
+      const backgroundColors = [];
+
+      for (let i = 0; i < aminoAcids.length; i++) {
+        const label = aminoAcids[i].value.trim();
+        const count = parseInt(counts[i].value) || 0;
+        if (label && aminoAcidColors[label]) {
+          labels.push(label);
+          dataValues.push(count);
+          // 为每个氨基酸使用辛普森风格的颜色
+          backgroundColors.push(aminoAcidColors[label]);
+        }
+      }
+
+      // 更新饼图数据
+      myChart.data.labels = labels;
+      myChart.data.datasets[0].data = dataValues;
+      myChart.data.datasets[0].backgroundColor = backgroundColors;
+      myChart.update();  // 刷新饼图
+    });
+
+    // 添加新的输入框
+    function addInput() {
+      const inputGroup = document.createElement('div');
+      inputGroup.classList.add('input-group');
+      inputGroup.innerHTML = `
+        <input type="text" name="aminoAcid[]" placeholder="氨基酸名称 (如：Ala)" required>
+        <input type="number" name="count[]" placeholder="数目" required>
+        <button type="button" onclick="removeInput(this)">移除</button>
+      `;
+      document.getElementById('aminoAcidInputs').appendChild(inputGroup);
+    }
+
+    // 移除输入框
+    function removeInput(button) {
+      button.parentElement.remove();
     }
   </script>
 </body>
