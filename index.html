@@ -77,14 +77,22 @@
         plugins: {
           legend: {
             position: 'right',
-          },
-          title: {
-            display: true,
-            text: '突变氨基酸数目分布'
+            labels: {
+              generateLabels: function(chart) {
+                // 修改图例显示，添加百分比信息
+                const originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                return originalLabels.map((label, index) => {
+                  const value = chart.data.datasets[0].data[index];
+                  const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const percentage = ((value / total) * 100).toFixed(2);
+                  label.text += ` (${percentage}%)`; // 添加百分比到图例
+                  return label;
+                });
+              }
+            }
           },
           tooltip: {
             callbacks: {
-              // 显示每个部分的百分比
               label: function(tooltipItem) {
                 let label = tooltipItem.label || '';
                 if (label) {
@@ -97,6 +105,10 @@
                 return label;
               }
             }
+          },
+          title: {
+            display: true,
+            text: '突变氨基酸数目分布'
           }
         }
       }
