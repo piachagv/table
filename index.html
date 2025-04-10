@@ -36,28 +36,28 @@
   <script>
     const ctx = document.getElementById('mutationPieChart').getContext('2d');
 
-    // 固定的氨基酸颜色（20种）
+    // 辛普森风格的氨基酸颜色（20种）
     const aminoAcidColors = {
-      "Ala": "#FF6347", // Ala - 番茄红
-      "Cys": "#8B4513", // Cys - 深棕色
-      "Asp": "#FF4500", // Asp - 橙红色
-      "Glu": "#32CD32", // Glu - 石灰绿
-      "Phe": "#FFD700", // Phe - 金色
-      "Gly": "#ADFF2F", // Gly - 绿黄色
-      "His": "#8A2BE2", // His - 蓝紫色
-      "Ile": "#A52A2A", // Ile - 红棕色
-      "Lys": "#00FFFF", // Lys - 青色
-      "Leu": "#D2691E", // Leu - 巧克力色
-      "Met": "#FF1493", // Met - 深粉色
-      "Asn": "#B0E0E6", // Asn - 浅蓝色
-      "Pro": "#8B0000", // Pro - 深红色
-      "Gln": "#98FB98", // Gln - 古铜色
-      "Arg": "#C71585", // Arg - 深紫色
-      "Ser": "#A9A9A9", // Ser - 深灰色
-      "Thr": "#D3D3D3", // Thr - 淡灰色
-      "Trp": "#E6E6FA", // Trp - 淡紫色
-      "Tyr": "#F08080", // Tyr - 浅珊瑚色
-      "Val": "#D3D3D3"  // Val - 暗灰色
+      "Ala": "#F6B700", // 亮黄色
+      "Cys": "#D63031", // 红色
+      "Asp": "#00B5E2", // 蓝色
+      "Glu": "#FF6B6B", // 粉红色
+      "Phe": "#6B1E1E", // 暗红色
+      "Gly": "#A29BFE", // 淡紫色
+      "His": "#F79C42", // 橙色
+      "Ile": "#0984E3", // 深蓝色
+      "Lys": "#DFF6F0", // 浅青色
+      "Leu": "#2D3436", // 深灰色
+      "Met": "#00B894", // 绿色
+      "Asn": "#81ECEC", // 浅蓝色
+      "Pro": "#FD79A8", // 亮粉色
+      "Gln": "#E17055", // 橙红色
+      "Arg": "#74B9FF", // 浅蓝色
+      "Ser": "#FFE156", // 明黄色
+      "Thr": "#FDCB82", // 浅橙色
+      "Trp": "#6C5CE7", // 紫色
+      "Tyr": "#A29BFE", // 淡紫色
+      "Val": "#55E6F3"  // 天蓝色
     };
 
     // 初始化饼图数据
@@ -123,7 +123,7 @@
         if (label && aminoAcidColors[label]) {
           labels.push(label);
           dataValues.push(count);
-          // 为每个氨基酸使用固定的颜色
+          // 为每个氨基酸使用辛普森风格的颜色
           backgroundColors.push(aminoAcidColors[label]);
         }
       }
